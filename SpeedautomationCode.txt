@@ -1,0 +1,149 @@
+int led1=10;
+int led2=11;
+int m1=6;
+int m2=7;
+int m3=8;
+int m4=9;
+int sped=0;
+int l1,l2=0;
+boolean mode = 0;
+char pn;
+float value=0;
+float rev=0;
+int rpm;
+int spd=0;
+int oldtime=0;        
+int time;
+
+void isr()          //interrupt service routine
+{
+rev++;
+}
+
+void setup()
+{
+   pinMode(led1,OUTPUT);
+pinMode(led2,OUTPUT);
+ pinMode(m1,OUTPUT);
+pinMode(m2,OUTPUT);
+pinMode(m3,OUTPUT);
+pinMode(m4,OUTPUT);
+   
+digitalWrite(2 ,HIGH);// Instead of using a pull up resistor
+attachInterrupt(0,isr,RISING);  //attaching the interrupt
+Serial.begin(9600);
+    digitalWrite(m1,HIGH);
+  digitalWrite(m2,LOW);
+  digitalWrite(m3,HIGH);
+  digitalWrite(m4,LOW);
+ 
+
+}
+void Count()
+{
+  delay(2000);
+detachInterrupt(0);           //detaches the interrupt while calculating
+time=millis()-oldtime;        //finds the time 
+rpm=((rev/time)*60000)/1;         //calculates rpm
+oldtime=millis();             //saves the current time
+rev=0;
+
+ 
+
+ 
+  spd=rpm*0.10466*2.9;
+  Serial.print(spd); 
+  Serial.println("km/hr");
+ 
+  attachInterrupt(0,isr,FALLING);
+}
+void loop()
+{
+
+if(Serial.available()>0)
+{
+  pn=Serial.read();
+}
+if(pn == 'm') mode =1;
+if(pn == 'n') mode =0;
+
+if(mode ==0){
+  Count();
+}
+if(mode ==1){
+if(pn == 'Z')
+{
+  digitalWrite(m1,LOW);
+  digitalWrite(m2,LOW);
+  digitalWrite(m3,LOW);
+  digitalWrite(m4,LOW);
+}
+if(pn == 'A')
+{
+  digitalWrite(m1,HIGH);
+  digitalWrite(m2,LOW);
+  digitalWrite(m3,HIGH);
+  digitalWrite(m4,LOW);
+}
+if(pn == 'B')
+{
+  digitalWrite(m1,LOW);
+  digitalWrite(m2,HIGH);
+  digitalWrite(m3,LOW);
+  digitalWrite(m4,HIGH);
+}
+if(pn == 'C')
+{
+  digitalWrite(m1,HIGH);
+  digitalWrite(m2,LOW);
+  digitalWrite(m3,LOW);
+  digitalWrite(m4,HIGH);
+}if(pn == 'D')
+{
+  digitalWrite(m1,LOW);
+  digitalWrite(m2,HIGH);
+  digitalWrite(m3,HIGH);
+  digitalWrite(m4,LOW);
+}
+if(pn == 'L')
+{
+  digitalWrite(led1,LOW);
+  if(l1 <=500)
+  {
+  digitalWrite(led2,HIGH);
+  l1+=1;
+  }
+  if(l1 <=1000)
+  {
+  digitalWrite(led2,LOW);
+  l1+=1;
+  }
+  else l1=1;
+  
+}
+if(pn == 'R')
+{
+  
+  digitalWrite(led2,LOW);
+  if(l1 <=500)
+  {
+  digitalWrite(led1,HIGH);
+  l1+=1;
+  }
+  if(l1 <=1000)
+  {
+  digitalWrite(led1,LOW);
+  l1+=1;
+  }
+  else l1=1;
+  
+  
+}
+if(pn == 'S')
+{
+  digitalWrite(led1,LOW);
+  digitalWrite(led2,LOW);
+  
+}
+}
+}
